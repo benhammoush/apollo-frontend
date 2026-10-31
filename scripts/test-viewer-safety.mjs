@@ -1082,6 +1082,21 @@ test('successful navigation and older loads preserve valid values and merge time
   assert.equal(lazy.params.loadedFromRef.current, older.time)
 })
 
+test('older history never prepends overlapping or newer candles', async () => {
+  const older = { ...bar, time: bar.time - 60 }
+  const newer = { ...bar, time: bar.time + 60 }
+  for (const response of [[older, bar, newer], [bar, newer], [newer]]) {
+    const h = chartHarness(async () => ({ ok: true, json: async () => response }))
+    const before = h.params.barsRef.current
+    h.hook.loadOlderChunk()
+    await settle()
+    assert.deepEqual(h.params.barsRef.current, response.includes(older) ? [older, bar] : before)
+    assert.equal(h.writes.length, response.includes(older) ? 1 : 0)
+    assert.equal(h.params.isFetchingMoreRef.current, false)
+    assert.equal(h.params.loadedFromRef.current, response.includes(older) ? older.time : -1)
+  }
+})
+
 test('fallback stays cancellable before headers and throughout response body parsing', async t => {
   t.mock.method(console, 'error', () => {})
   for (const phase of ['headers', 'body']) {

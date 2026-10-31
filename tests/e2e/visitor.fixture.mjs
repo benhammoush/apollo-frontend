@@ -3,6 +3,7 @@
  */
 import { test as base, expect } from '@playwright/test'
 import { readFileSync } from 'node:fs'
+import { historyBars } from './history.fixture.mjs'
 
 export { expect }
 const config = JSON.parse(readFileSync('.github/ci-cd.json', 'utf8'))
@@ -17,6 +18,7 @@ const rows = Array.from({ length: 120 }, (_, i) => [
 
 /** Intercept all external traffic before application startup, including WebSockets. */
 async function visitor({ page, context }, use) {
+  const snapshotTime = Date.now()
   const state = {
     requests: [],
     writes: [],
@@ -46,16 +48,7 @@ async function visitor({ page, context }, use) {
       json = [{ symbol: 'EURUSD', status: 'ready', bid: 1.1, ask: 1.1002 }]
     else if (url.pathname === '/data/brokers') json = { brokers: ['market'] }
     else if (url.pathname === '/market/EURUSD') {
-      const step = url.searchParams.get('tf') === 'H4' ? 14400 : 60
-      const end = Math.floor(Date.now() / 1000 / step) * step
-      json = Array.from({ length: 120 }, (_, i) => ({
-        time: end - (120 - i) * step,
-        open: 1.1 + i * 0.0001,
-        high: 1.101 + i * 0.0001,
-        low: 1.099 + i * 0.0001,
-        close: 1.1 + i * 0.0001 + (i % 2 ? -0.0005 : 0.0005),
-        volume: i,
-      }))
+      json = historyBars(url, snapshotTime)
     } else if (url.pathname === '/storage/tree')
       json = {
         tree: [
