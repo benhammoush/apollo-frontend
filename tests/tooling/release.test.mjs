@@ -3,13 +3,26 @@
  */
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { existsSync, readFileSync, mkdtempSync, writeFileSync, symlinkSync, rmSync } from 'node:fs'
+import {
+  existsSync,
+  readFileSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  symlinkSync,
+  rmSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { ESLint } from 'eslint'
 import { parse } from 'yaml'
 import { deliverySettings } from '../../scripts/delivery-policy.mjs'
-import { assertPublicationInputs, checkText, regularFiles } from '../../scripts/check-release.mjs'
+import {
+  assertPublicationInputs,
+  checkRelease,
+  checkText,
+  regularFiles,
+} from '../../scripts/check-release.mjs'
 
 const config = JSON.parse(readFileSync('.github/ci-cd.json', 'utf8'))
 const hosting = JSON.parse(readFileSync('vercel.json', 'utf8'))
@@ -134,6 +147,47 @@ test('visitor source omits unavailable private workflows and legacy pane setting
   )
   const publicGuide = readFileSync('docs/release-preparation.md', 'utf8')
   assert.doesNotMatch(publicGuide, /IC Markets|ngrok|SMOKE_BYPASS|SETUP\.md|apollo-frontend-dev/)
+})
+
+test('CodeRabbit approves completed reviews without author overrides and keeps inherited policy', () => {
+  const policy = parse(readFileSync('.coderabbit.yaml', 'utf8'), {
+    uniqueKeys: true,
+    maxAliasCount: 0,
+  })
+  assert.deepEqual(policy, {
+    inheritance: true,
+    reviews: {
+      high_level_summary: false,
+      auto_approvals: { enabled: true, allow_author_approval: false },
+      auto_review: { enabled: true, auto_incremental_review: true },
+    },
+  })
+  assertPublicationInputs(['.coderabbit.yaml'], readFileSync('.gitignore', 'utf8'))
+  assert.ok(readFileSync('scripts/check-release.mjs', 'utf8').includes("'.coderabbit.yaml'"))
+})
+
+test('publication scans credentials inside the CodeRabbit YAML configuration', () => {
+  const root = mkdtempSync(join(tmpdir(), 'apollo-yaml-scan-'))
+  try {
+    for (const name of ['src', 'scripts', 'tests', '.github', 'review-assets', 'docs'])
+      mkdirSync(join(root, name))
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify({ version: '0.0.1', private: true, scripts: {} }),
+    )
+    writeFileSync(
+      join(root, 'package-lock.json'),
+      JSON.stringify({ version: '0.0.1', packages: { '': { version: '0.0.1' } } }),
+    )
+    writeFileSync(join(root, 'src/appVersion.ts'), "export const APP_PACKAGE_VERSION = '0.0.1'")
+    writeFileSync(join(root, '.gitignore'), '')
+    writeFileSync(join(root, '.coderabbit.yaml'), 'inheritance: true\n')
+    assert.ok(checkRelease(root) > 0)
+    writeFileSync(join(root, '.coderabbit.yaml'), `# ${'ghp_' + 'a'.repeat(36)}\n`)
+    assert.throws(() => checkRelease(root), /Possible credential in .coderabbit.yaml/)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
 })
 
 test('all callers pin one published shared revision and retain safe triggers', () => {
