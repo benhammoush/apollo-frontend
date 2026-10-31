@@ -296,11 +296,12 @@ export function useOhlcvData(p: Params): Result {
 
         if (olderBars.length === 0) { p.loadedFromRef.current = -1; return }
 
-        p.loadedFromRef.current = olderBars[0].time
-
         const existingTimes = new Set(p.barsRef.current.map(b => b.time))
-        const newBars = olderBars.filter(b => !existingTimes.has(b.time))
+        // Date-only responses can overlap the loaded day; only prepend earlier candles.
+        const prependBefore = Math.min(chunkEndTs, p.barsRef.current[0]?.time ?? chunkEndTs)
+        const newBars = olderBars.filter(b => b.time < prependBefore && !existingTimes.has(b.time))
         if (newBars.length === 0) { p.loadedFromRef.current = -1; return }
+        p.loadedFromRef.current = newBars[0].time
 
         const visibleRange = p.chartRef.current.timeScale().getVisibleLogicalRange()
 
