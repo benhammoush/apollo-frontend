@@ -1,0 +1,16 @@
+name: Weekly vulnerability audit
+on:
+  schedule:
+    - cron: '43 8 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: weekly-vuln-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    name: Audit vulnerabilities
+    uses: benhammoush/ci-cd-workflows/.github/workflows/weekly-vuln-audit.yml@43018f3d7ec3605d14379be6f1f5de287ad6a1f1
+    with:
+      node_version: '24'

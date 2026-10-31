@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "profile": "web",
+  "nodeVersion": "24",
+  "automationSha": "43018f3d7ec3605d14379be6f1f5de287ad6a1f1",
+  "integration": false,
+  "lockScope": "all",
+  "legacyChecks": [],
+  "deploymentVariables": [
+    "VERCEL_ORG_ID",
+    "VERCEL_PROJECT_ID",
+    "DEV_PROJECT_ID",
+    "PRODUCTION_PROJECT_ID",
+    "TARGET_ORIGIN"
+  ],
+  "buildEnvironment": {
+    "dev": {
+      "VITE_API_URL": "https://unearned-matter-crib.ngrok-free.dev",
+      "VITE_WS_URL": "wss://unearned-matter-crib.ngrok-free.dev/ws"
+    },
+    "production": {
+      "VITE_API_URL": "https://unearned-matter-crib.ngrok-free.dev",
+      "VITE_WS_URL": "wss://unearned-matter-crib.ngrok-free.dev/ws"
+    }
+  }
+}

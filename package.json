@@ -1,0 +1,60 @@
+{
+  "name": "apollo-dashboard",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "engines": {
+    "node": "24.x",
+    "npm": "11.x"
+  },
+  "overrides": {
+    "minimatch": "11.0.3"
+  },
+  "scripts": {
+    "dev:preview": "vite --mode public",
+    "build": "tsc && vite build --mode public",
+    "build:hosted": "tsc && node scripts/build-hosted.mjs",
+    "test": "node --test scripts/test-viewer-safety.mjs scripts/test-public-hosting.mjs tests/tooling/*.test.mjs",
+    "lint": "eslint . --max-warnings 0",
+    "format:check": "node scripts/check-format.mjs",
+    "check:release": "node scripts/check-release.mjs",
+    "check:notices": "node scripts/notices.mjs --check",
+    "audit:dependencies": "npm audit && npm audit --omit=dev",
+    "ci:quality": "npm run lint && npm run format:check && tsc --noEmit && npm run check:release && npm run check:notices && npm run audit:dependencies && npm test && npm run build:hosted && node scripts/check-release.mjs --dist",
+    "ci:browser": "playwright test"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.13.19",
+    "@uiw/react-json-view": "^2.0.0-alpha.41",
+    "arquero": "^8.0.3",
+    "lightweight-charts": "^5.0.5",
+    "lightweight-charts-indicators": "^0.4.0",
+    "lucide-react": "^0.400.0",
+    "oakscriptjs": "^0.2.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-resizable-panels": "^4.9.0",
+    "react-router-dom": "^7.13.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.40",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.3",
+    "vite": "6.4.5",
+    "@playwright/test": "1.64.1",
+    "eslint": "10.14.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "8.72.1",
+    "eslint-plugin-jsdoc": "^65.4.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "prettier": "^3.0.0",
+    "yaml": "^2.0.0",
+    "ignore": "5.3.2"
+  }
+}

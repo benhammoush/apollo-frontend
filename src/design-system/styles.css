@@ -1,0 +1,2 @@
+/* Single shared stylesheet entry. Feature-specific presentation stays with its owner. */
+@import './base.css';

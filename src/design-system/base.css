@@ -1,0 +1,24 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--app-bg); color: var(--app-fg); font-family: var(--apollo-fonts-sans); font-feature-settings: "tnum" 1; -webkit-text-size-adjust: 100%; transition: background-color 160ms ease, color 160ms ease; }
+button, a { touch-action: manipulation; }
+input, select, textarea { font-size: 16px; } /* prevent iOS auto-zoom on focus */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--app-scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--app-scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--app-scrollbar-thumb-hover); }
+
+/* Apollo logo animation — defined globally so multiple instances share one keyframe */
+@keyframes apolloFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+.apollo-sc { transform-box: fill-box; transform-origin: 50% 50%; }
+.apollo-sc1 { animation: apolloFloat 2.8s ease-in-out infinite 0.00s; }
+.apollo-sc2 { animation: apolloFloat 2.8s ease-in-out infinite 0.35s; }
+.apollo-sc3 { animation: apolloFloat 2.8s ease-in-out infinite 0.70s; }
+.apollo-sc4 { animation: apolloFloat 2.8s ease-in-out infinite 1.05s; }

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci --ignore-scripts --no-audit --no-fund --include=dev",
+  "buildCommand": "npm run build:hosted",
+  "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "/.*",
+      "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+        "X-Frame-Options": "DENY"
+      },
+      "continue": true
+    },
+    { "handle": "filesystem" },
+    { "src": "/(engine|data|account)(/[^.]*)?", "dest": "/index.html" },
+    { "src": "/.*", "status": 404 }
+  ]
+}
