@@ -166,7 +166,7 @@ test('CodeRabbit approves completed reviews without author overrides and keeps i
   assert.ok(readFileSync('scripts/check-release.mjs', 'utf8').includes("'.coderabbit.yaml'"))
 })
 
-test('publication scans credentials inside the CodeRabbit YAML configuration', () => {
+test('publication scans YAML and extensionless metadata for credentials', () => {
   const root = mkdtempSync(join(tmpdir(), 'apollo-yaml-scan-'))
   try {
     for (const name of ['src', 'scripts', 'tests', '.github', 'review-assets', 'docs'])
@@ -181,10 +181,13 @@ test('publication scans credentials inside the CodeRabbit YAML configuration', (
     )
     writeFileSync(join(root, 'src/appVersion.ts'), "export const APP_PACKAGE_VERSION = '0.0.1'")
     writeFileSync(join(root, '.gitignore'), '')
-    writeFileSync(join(root, '.coderabbit.yaml'), 'inheritance: true\n')
-    assert.ok(checkRelease(root) > 0)
-    writeFileSync(join(root, '.coderabbit.yaml'), `# ${'ghp_' + 'a'.repeat(36)}\n`)
-    assert.throws(() => checkRelease(root), /Possible credential in .coderabbit.yaml/)
+    for (const name of ['.coderabbit.yaml', '.gitattributes', '.gitignore', '.nvmrc']) {
+      writeFileSync(join(root, name), '# Public metadata\n')
+      assert.ok(checkRelease(root) > 0)
+      writeFileSync(join(root, name), `# ${'ghp_' + 'a'.repeat(36)}\n`)
+      assert.throws(() => checkRelease(root), /Possible credential/, name)
+      writeFileSync(join(root, name), '# Public metadata\n')
+    }
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

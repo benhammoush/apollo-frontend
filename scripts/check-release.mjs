@@ -89,7 +89,10 @@ export function checkRelease(root = '.', dist = false) {
       ),
       `Excluded file: ${name}`,
     )
-    if (/\.(?:[cm]?js|tsx?|json|html|md|txt|ya?ml|css)$/.test(name))
+    if (
+      /\.(?:[cm]?js|tsx?|json|html|md|txt|ya?ml|css)$/.test(name) ||
+      ['.gitattributes', '.gitignore', '.nvmrc'].includes(name)
+    )
       checkText(readFileSync(file, 'utf8'), name)
     if (dist)
       assert.ok(
