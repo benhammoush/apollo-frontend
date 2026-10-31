@@ -1,0 +1,3 @@
+# Keep text checkouts reproducible across Windows and Linux without changing binaries.
+* text=auto eol=lf
+*.png -text

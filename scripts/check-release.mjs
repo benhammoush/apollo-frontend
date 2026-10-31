@@ -66,7 +66,10 @@ export function checkRelease(root = '.', dist = false) {
     }
   if (!dist)
     for (const name of readdirSync(root)) {
-      if (/\.(?:json|mjs|html|md)$/.test(name) || ['.gitignore', '.nvmrc'].includes(name))
+      if (
+        /\.(?:json|mjs|html|md)$/.test(name) ||
+        ['.coderabbit.yaml', '.gitattributes', '.gitignore', '.nvmrc'].includes(name)
+      )
         files.push(join(root, name))
     }
   if (!dist)
@@ -86,7 +89,10 @@ export function checkRelease(root = '.', dist = false) {
       ),
       `Excluded file: ${name}`,
     )
-    if (/\.(?:[cm]?js|tsx?|json|html|md|txt|yml|css)$/.test(name))
+    if (
+      /\.(?:[cm]?js|tsx?|json|html|md|txt|ya?ml|css)$/.test(name) ||
+      ['.gitattributes', '.gitignore', '.nvmrc'].includes(name)
+    )
       checkText(readFileSync(file, 'utf8'), name)
     if (dist)
       assert.ok(
