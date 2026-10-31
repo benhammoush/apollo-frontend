@@ -66,7 +66,10 @@ export function checkRelease(root = '.', dist = false) {
     }
   if (!dist)
     for (const name of readdirSync(root)) {
-      if (/\.(?:json|mjs|html|md)$/.test(name) || ['.gitignore', '.nvmrc'].includes(name))
+      if (
+        /\.(?:json|mjs|html|md)$/.test(name) ||
+        ['.gitattributes', '.gitignore', '.nvmrc'].includes(name)
+      )
         files.push(join(root, name))
     }
   if (!dist)

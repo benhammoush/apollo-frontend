@@ -112,6 +112,9 @@ test('publication ignores keep the synthetic log module while excluding local da
 })
 
 test('generated notices keep license wording without trailing whitespace', () => {
+  const attributes = readFileSync('.gitattributes', 'utf8').split(/\r?\n/)
+  assert.ok(attributes.includes('* text=auto eol=lf'))
+  assert.ok(attributes.includes('*.png -text'))
   for (const name of ['notices.html', 'third-party-notices.txt']) {
     const text = readFileSync(`review-assets/${name}`, 'utf8')
     assert.doesNotMatch(text, /[\t ]+\r?$/m)
