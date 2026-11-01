@@ -50,21 +50,26 @@ const history = loadSource('utils/readOhlcvResponse.ts')
 const paging = loadSource('utils/datasetPaging.ts')
 const bar = { time: 1704067200, open: 1.1, high: 1.2, low: 1, close: 1.15, volume: 0 }
 
-test('default workspace is two EURUSD charts above a random dataset and the log viewer', () => {
+test('default workspace opens EURUSD history, its selected dataset and left-chart session OHLC', () => {
   const state = loadSource('store/persistedState.ts')
   const workspace = state.DEFAULT_TAB
   assert.equal(workspace.layoutMode, 4)
   assert.deepEqual(workspace.slots, [
     { type: 'chart', symbol: 'EURUSD' }, { type: 'chart', symbol: 'EURUSD' },
-    { type: 'dataset', openRandom: true }, { type: 'logs' },
+    { type: 'dataset', selectedFile: 'indicators/Triggers_BT/EURUSD.csv', openRandom: false }, { type: 'logs' },
   ])
   assert.equal(workspace.charts['0'].tf, 'M1')
   assert.equal(workspace.charts['1'].tf, 'H4')
-  for (const chart of Object.values(workspace.charts)) {
-    assert.ok(Object.values(chart.indicators).every(indicator => !indicator.enabled))
-  }
+  assert.ok(Object.values(workspace.charts['0'].indicators.sessionsOhlc).every(value => value === true))
+  assert.ok(Object.entries(workspace.charts['0'].indicators).every(([id, indicator]) => id === 'sessionsOhlc' || !indicator.enabled))
+  assert.ok(Object.values(workspace.charts['1'].indicators).every(indicator => !indicator.enabled))
   assert.deepEqual(state.DEFAULT_PERSISTED.slots.slice(0, 4), workspace.slots)
   assert.deepEqual(state.DEFAULT_PERSISTED.charts, workspace.charts)
+  assert.deepEqual(state.DEFAULT_PERSISTED.tabs.map(tab => [tab.name, tab.type]), [
+    ['Workspace 1', 'workspace'], ['Engine', 'engine'], ['Storage', 'storage'], ['Data', 'data'],
+  ])
+  assert.equal(state.DEFAULT_PERSISTED.activeTabId, workspace.id)
+  assert.equal(new Set(state.DEFAULT_PERSISTED.tabs.map(tab => tab.id)).size, 4)
   assert.deepEqual(state.DEFAULT_PERSISTED.slotSymbols.slice(0, 2), ['EURUSD', 'EURUSD'])
 })
 
@@ -120,6 +125,27 @@ test('new workspace defaults do not replace the existing workspace or its prefer
   assert.equal(state.DEFAULT_TAB.charts['0'].tf, 'M1', 'Editing a new workspace must not mutate the defaults')
 })
 
+test('fresh storage opens four default tabs without reopening closed tabs in a saved workspace', () => {
+  const state = loadSource('store/persistedState.ts')
+  const { PersistenceManager } = loadSource('store/persistence.ts', { './persistedState': state })
+  const originalStorage = globalThis.localStorage
+  let saved = null
+  try {
+    globalThis.localStorage = { getItem: () => saved }
+    assert.deepEqual(PersistenceManager.load().tabs.map(tab => tab.type), ['workspace', 'engine', 'storage', 'data'])
+    saved = JSON.stringify({ ...state.DEFAULT_PERSISTED, uiThemeMode: 'light',
+      tabs: [{ ...state.DEFAULT_TAB, name: 'My saved workspace' }] })
+    const restored = PersistenceManager.load()
+    assert.equal(restored.tabs.length, 1)
+    assert.equal(restored.tabs[0].name, 'My saved workspace')
+    assert.equal(restored.uiThemeMode, 'light')
+    assert.equal(restored.activeTabId, state.DEFAULT_TAB.id)
+  } finally {
+    if (originalStorage === undefined) delete globalThis.localStorage
+    else globalThis.localStorage = originalStorage
+  }
+})
+
 test('saving snapshots live workspace slots and charts so reload preserves a chosen or closed dataset', t => {
   const state = loadSource('store/persistedState.ts')
   const { PersistenceManager } = loadSource('store/persistence.ts', { './persistedState': state })
@@ -148,7 +174,8 @@ test('saving snapshots live workspace slots and charts so reload preserves a cho
       assert.equal(restored.charts['0'].tf, 'M5')
       assert.equal(JSON.stringify(live), before, 'Saving must not mutate active/default tab records')
     }
-    assert.equal(state.DEFAULT_TAB.slots[2].openRandom, true)
+    assert.equal(state.DEFAULT_TAB.slots[2].openRandom, false)
+    assert.equal(state.DEFAULT_TAB.slots[2].selectedFile, 'indicators/Triggers_BT/EURUSD.csv')
   } finally {
     if (originalStorage === undefined) delete globalThis.localStorage
     else globalThis.localStorage = originalStorage
@@ -487,7 +514,7 @@ test('Design-system ownership has no legacy imports, feature dependencies or com
   assert.doesNotMatch(tokens, /\b(?:document|window|localStorage|fetch)\s*[.(]/)
 })
 
-test('Indicator modal masks and disables only the fourteen selected entries, including saved active indicators', () => {
+test('Indicator modal masks and disables the fifteen unavailable entries, including Levels', () => {
   const tokens = loadDesignModule()
   const library = loadSource('components/chart/indicatorLibrary.ts')
   const persisted = loadSource('store/persistedState.ts')
@@ -495,7 +522,7 @@ test('Indicator modal masks and disables only the fourteen selected entries, inc
     'react/jsx-runtime': jsxRuntime, '../../design-system': tokens, './indicatorLibrary': library,
   })
   const disabledIds = ['bollingerBands', 'atr', 'adx', 'rsi', 'ema20', 'ema50', 'ema200',
-    'sma20', 'sma50', 'sma200', 'trends', 'families', 'triggers', 'sessionLevels']
+    'sma20', 'sma50', 'sma200', 'trends', 'families', 'triggers', 'sessionLevels', 'levels']
   function collectButtons(node, result = []) {
     if (!React.isValidElement(node)) return result
     if (node.type === 'button') result.push(node)
@@ -514,7 +541,7 @@ test('Indicator modal masks and disables only the fourteen selected entries, inc
     const buttons = collectButtons(tree)
     assert.equal(buttons.length, library.INDICATOR_DEFINITIONS.length + 1)
     const choices = buttons.filter(button => button.props.children?.type === 'span')
-    assert.equal(choices.filter(button => button.props.disabled).length, 14)
+    assert.equal(choices.filter(button => button.props.disabled).length, 15)
     for (const [index, definition] of library.INDICATOR_DEFINITIONS.entries()) {
       const masked = disabledIds.includes(definition.id)
       const choice = choices[index]
@@ -527,12 +554,34 @@ test('Indicator modal masks and disables only the fourteen selected entries, inc
         choice.props.onClick()
       }
     }
-    assert.deepEqual(actions, ['close', 'sessionsOhlc', 'close', 'levels', 'close', 'stockExchanges'])
+    assert.deepEqual(actions, ['close', 'sessionsOhlc', 'close', 'stockExchanges'])
     const html = renderToStaticMarkup(tree)
     for (const definition of library.INDICATOR_DEFINITIONS.filter(def => disabledIds.includes(def.id))) {
       assert.ok(!html.includes(`<span>${definition.label}</span>`))
     }
     assert.equal(IndicatorModal({ ...props, open: false }), null)
+  }
+})
+
+test('unavailable Levels cannot be restored from saved or legacy chart settings', () => {
+  const state = loadSource('store/persistedState.ts')
+  for (const saved of [
+    { indicators: { levels: { enabled: true, showH1: true, showD1: true } } },
+    { levelVisible: { H1: true, W1: true } },
+  ]) {
+    const input = { ...saved, tf: 'H4', symbol: 'EURUSD', fibSettings: { lineColor: '#123456' },
+      indicators: { ...saved.indicators,
+        stockExchanges: { enabled: true, showTSE: true },
+        sessionsOhlc: { enabled: true, showLondon: true } } }
+    const before = structuredClone(input)
+    const restored = state.withChartStateDefaults(input)
+    assert.deepEqual(restored.indicators.levels, state.DEFAULT_CHART_INDICATORS.levels)
+    assert.equal(restored.indicators.stockExchanges.showTSE, true)
+    assert.equal(restored.indicators.sessionsOhlc.showLondon, true)
+    assert.equal(restored.tf, 'H4')
+    assert.equal(restored.symbol, 'EURUSD')
+    assert.equal(restored.fibSettings.lineColor, '#123456')
+    assert.deepEqual(input, before)
   }
 })
 

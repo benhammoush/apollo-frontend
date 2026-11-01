@@ -59,10 +59,18 @@ async function visitor({ page, context }, use) {
             type: 'folder',
             children: [
               {
-                id: 'sample',
-                name: 'Synthetic.csv',
-                path: 'Indicators/Synthetic.csv',
-                type: 'file',
+                id: 'triggers',
+                name: 'Triggers_BT',
+                path: 'indicators/Triggers_BT',
+                type: 'folder',
+                children: [
+                  {
+                    id: 'sample',
+                    name: 'EURUSD.csv',
+                    path: 'indicators/Triggers_BT/EURUSD.csv',
+                    type: 'file',
+                  },
+                ],
               },
             ],
           },
@@ -76,6 +84,10 @@ async function visitor({ page, context }, use) {
         fields: ['time', 'symbol', 'example', 'value'],
         page_size: 40,
         paginated: true,
+        dataset_id: 'synthetic-fixture',
+        masked_preview: true,
+        data_notice:
+          'Template preview: chronological synthetic dates; all other cells are xxxx. No original rows.',
       }
     else if (url.pathname === '/storage/file') {
       const offset = Number(url.searchParams.get('offset'))

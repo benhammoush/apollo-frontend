@@ -238,6 +238,7 @@ export default function DatasetViewerModal({
       {manifest && !error && (
         <div style={{ padding: '6px 14px', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', fontSize: 10, color: theme.colors.text.muted }}>
           <span>{data.length.toLocaleString()} of {manifest.total.toLocaleString()} rows loaded</span>
+          {metadata?.masked_preview === true && <span>Synthetic template · no original rows</span>}
           {nextOffset !== null && !moreError && <span>Scroll down to load more.</span>}
           {data.length < manifest.total && <span>Search, sort, JSON and copy use loaded rows only.</span>}
           {moreError && <><span role="alert">{moreError}</span><button onClick={loadData}>Reload dataset</button></>}
@@ -269,7 +270,6 @@ export default function DatasetViewerModal({
               activeKey={null}
               onKeyChange={() => {}}
               totals={tableData.totals}
-              meta={tableData.meta}
               enableRowMarks
               rowMarksKey={manifest ? `${target.filePath}:${manifest.revision}` : target.filePath}
               onNavigateToDate={onNavigateToDate}

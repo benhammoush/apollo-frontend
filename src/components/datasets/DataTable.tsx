@@ -167,14 +167,13 @@ function inferColumnWidths(
 /* table component */
 /* ------------------------------------------------ */
 
-export function JsonTableViewer({ rows, aqTable, arrayKeys, activeKey, onKeyChange, totals, meta, enableRowMarks, rowMarksKey, onNavigateToDate, onEndReached, filterResetKey, virtualizeColumns = false, loadingMore = false, hasMoreRows = false }: {
+export function JsonTableViewer({ rows, aqTable, arrayKeys, activeKey, onKeyChange, totals, enableRowMarks, rowMarksKey, onNavigateToDate, onEndReached, filterResetKey, virtualizeColumns = false, loadingMore = false, hasMoreRows = false }: {
   rows: Record<string, unknown>[]
   aqTable?: AqTable | null
   arrayKeys?: string[]
   activeKey?: string | null
   onKeyChange?: (k: string) => void
   totals?: Record<string, number>
-  meta?: Record<string, string>
   enableRowMarks?: boolean
   rowMarksKey?: string
   onNavigateToDate?: (ts: number, anchorEl: HTMLElement, symbol?: string) => void
@@ -622,17 +621,6 @@ export function JsonTableViewer({ rows, aqTable, arrayKeys, activeKey, onKeyChan
             >
               {k}{totals?.[`${k}_total`] != null ? ` (${totals[`${k}_total`]})` : ''}
             </button>
-          ))}
-        </div>
-      )}
-
-      {/* meta */}
-      {meta && Object.keys(meta).length > 0 && (
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {Object.entries(meta).map(([k, v]) => (
-            <span key={k} style={{ fontSize: 10, color: theme.colors.text.muted }}>
-              <span style={{ color: theme.colors.text.dimmer }}>{k}:</span> {v}
-            </span>
           ))}
         </div>
       )}

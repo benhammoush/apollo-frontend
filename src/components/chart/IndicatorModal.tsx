@@ -16,7 +16,7 @@ const GROUPS: IndicatorGroupId[] = ['core', 'context', 'custom']
 const MASKED_INDICATORS = new Set<ChartIndicatorId>([
   'bollingerBands', 'atr', 'adx', 'rsi',
   'ema20', 'ema50', 'ema200', 'sma20', 'sma50', 'sma200',
-  'trends', 'families', 'triggers', 'sessionLevels',
+  'trends', 'families', 'triggers', 'sessionLevels', 'levels',
 ])
 
 export default function IndicatorModal({

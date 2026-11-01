@@ -500,7 +500,8 @@ export function withChartStateDefaults(state?: Partial<PersistedChartState> | nu
         ...(state?.indicators?.sessionsOhlc?.enabled === true ? state.indicators.sessionsOhlc : {}) },
       stockExchanges: { ...DEFAULT_CHART_STATE.indicators.stockExchanges,
         ...(state?.indicators?.stockExchanges?.enabled === true ? state.indicators.stockExchanges : {}) },
-      levels: migrateLevelsToIndicator(state?.indicators?.levels, state?.levelVisible),
+      // Levels is unavailable; saved and legacy visibility must not request its worker.
+      levels: { ...DEFAULT_CHART_STATE.indicators.levels },
     },
     fibSettings: {
       ...DEFAULT_FIB_SETTINGS,
@@ -649,7 +650,7 @@ const DEFAULT_SLOT_SYMBOLS: PersistedState['slotSymbols'] =
 const DEFAULT_SLOTS: SlotState[] = [
   { type: 'chart', symbol: 'EURUSD' },
   { type: 'chart', symbol: 'EURUSD' },
-  { type: 'dataset', openRandom: true },
+  { type: 'dataset', selectedFile: 'indicators/Triggers_BT/EURUSD.csv', openRandom: false },
   { type: 'logs' },
   { type: 'empty' },
   { type: 'empty' },
@@ -664,7 +665,13 @@ export const DEFAULT_TAB: WorkspaceTabRecord = {
   layoutMode: 4,
   activeSlot: 0,
   slots: DEFAULT_SLOTS.slice(0, 4),
-  charts: { '0': withChartStateDefaults({ tf: 'M1' }), '1': withChartStateDefaults({ tf: 'H4' }) },
+  charts: {
+    '0': withChartStateDefaults({ tf: 'M1', indicators: {
+      ...DEFAULT_CHART_INDICATORS,
+      sessionsOhlc: { enabled: true, showSydney: true, showTokyo: true, showLondon: true, showNewYork: true },
+    } }),
+    '1': withChartStateDefaults({ tf: 'H4' }),
+  },
   symbolSyncEnabled: false,
 }
 
@@ -678,7 +685,12 @@ export const DEFAULT_PERSISTED: PersistedState = {
   slotSymbols: DEFAULT_SLOT_SYMBOLS,
   charts: DEFAULT_TAB.charts,
   symbolSyncEnabled: false,
-  tabs: [DEFAULT_TAB],
+  tabs: [
+    DEFAULT_TAB,
+    { id: 'tab-engine', name: 'Engine', type: 'engine' },
+    { id: 'tab-storage', name: 'Storage', type: 'storage' },
+    { id: 'tab-data', name: 'Data', type: 'data' },
+  ],
   activeTabId: 'tab-1',
 }
 
