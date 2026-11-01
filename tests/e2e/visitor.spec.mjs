@@ -8,8 +8,19 @@ test('fresh workspace paints both default charts and restores its selected datas
   visitor,
 }) => {
   await page.goto('/')
-  await expect(page.getByText('Synthetic.csv', { exact: true })).toBeVisible()
+  await expect(page.getByText('EURUSD.csv', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Indicators 1 ▾', exact: true })).toHaveCount(1)
+  await page.getByRole('button', { name: 'Indicators 1 ▾', exact: true }).click()
+  await expect(page.getByText('Sess.OHLC', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Indicators 1 ▴', exact: true }).click()
   await expect(page.getByText(/40 of 120 rows loaded/)).toBeVisible()
+  await expect(
+    page.getByText('Synthetic template · no original rows', { exact: true }),
+  ).toBeVisible()
+  for (const field of ['dataset_id:', 'schema_version:', 'revision:', 'paginated:', 'page_size:'])
+    await expect(page.getByText(field, { exact: true })).toHaveCount(0)
+  for (const label of ['Workspace 1', 'Engine', 'Storage', 'Data'])
+    await expect(page.getByText(label, { exact: true }).filter({ visible: true })).toBeVisible()
   await expect
     .poll(() => visitor.requests.filter((url) => url.startsWith('/market/')).length)
     .toBeGreaterThanOrEqual(2)
@@ -31,7 +42,10 @@ test('fresh workspace paints both default charts and restores its selected datas
     )
     .toBeGreaterThanOrEqual(2)
   await page.reload()
-  await expect(page.getByText('Synthetic.csv', { exact: true })).toBeVisible()
+  await expect(page.getByText('EURUSD.csv', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Indicators 1 ▾', exact: true })).toHaveCount(1)
+  await page.getByRole('button', { name: 'Indicators 1 ▾', exact: true }).click()
+  await expect(page.getByText('Sess.OHLC', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'M1 ▾', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'H4 ▾', exact: true })).toBeVisible()
 })
@@ -70,7 +84,14 @@ test('initial dataset failure offers an explicit retry', async ({ page, visitor 
 })
 
 test('dataset search and successful JSON paging use the loaded subset', async ({ page }) => {
-  await page.goto('/')
+  // Row-tool assertions start after the selected snapshot arrives, not during queued chart reads.
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === '/storage/file' && response.status() === 200,
+    ),
+    page.goto('/'),
+  ])
   await expect(page.getByText(/40 of 120 rows loaded/)).toBeVisible()
   await expect(page.getByRole('textbox', { name: 'Search 40 rows', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'JSON Tree', exact: true }).click()
@@ -127,19 +148,19 @@ for (const type of ['engine', 'data', 'storage']) {
     page,
   }) => {
     await page.goto('/')
-    await expect(page.getByText('Synthetic.csv', { exact: true })).toBeVisible()
+    await expect(page.getByText('EURUSD.csv', { exact: true })).toBeVisible()
     await expect
       .poll(() =>
         page.evaluate(
           () => JSON.parse(localStorage.getItem('apollo_v2') ?? '{}').slots?.[2]?.selectedFile,
         ),
       )
-      .toBe('Indicators/Synthetic.csv')
+      .toBe('indicators/Triggers_BT/EURUSD.csv')
     const slots = await page.evaluate(() => JSON.parse(localStorage.getItem('apollo_v2')).slots)
-    if (type === 'storage') {
-      await page.getByTitle('New tab (Ctrl+T)', { exact: true }).click()
-      await page.getByRole('button', { name: 'Storage', exact: true }).click()
-    } else await page.goto(`/${type}`)
+    await page
+      .getByText({ engine: 'Engine', data: 'Data', storage: 'Storage' }[type], { exact: true })
+      .filter({ visible: true })
+      .click()
     await expect
       .poll(() =>
         page.evaluate(() => {
@@ -162,18 +183,49 @@ for (const type of ['engine', 'data', 'storage']) {
       )
       .toEqual({ theme: 'light', slots })
     await page.getByText('Workspace 1', { exact: true }).click()
-    await expect(page.getByText('Synthetic.csv', { exact: true })).toBeVisible()
+    await expect(page.getByText('EURUSD.csv', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'M1 ▾', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'H4 ▾', exact: true })).toBeVisible()
     await expect(page.getByRole('note')).toContainText('Synthetic example logs')
   })
 }
 
+test('Levels stays unavailable after restoring previously enabled chart settings', async ({
+  page,
+  visitor,
+}) => {
+  await page.goto('/')
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('apollo_v2'))).not.toBeNull()
+  await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('apollo_v2'))
+    const charts = [saved.charts, ...(saved.tabs ?? []).map((tab) => tab.charts)]
+    for (const group of charts)
+      for (const chart of Object.values(group ?? {})) {
+        chart.indicators = {
+          ...chart.indicators,
+          levels: { enabled: true, showH1: true, showD1: true },
+        }
+        chart.levelVisible = { H1: true, D1: true }
+      }
+    localStorage.setItem('apollo_v2', JSON.stringify(saved))
+  })
+  await page.reload()
+  await expect(page.getByText(/40 of 120 rows loaded/)).toBeVisible()
+  await page.getByRole('button', { name: 'Indic. ▾', exact: true }).first().click()
+  const unavailable = page.getByRole('button', { name: 'xxx', exact: true })
+  await expect(unavailable).toHaveCount(15)
+  for (const button of await unavailable.all()) await expect(button).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Niveaux', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Sessions OHLC', exact: true })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Stock Exchanges', exact: true })).toBeEnabled()
+  expect(visitor.requests.some((url) => url.startsWith('/levels/'))).toBe(false)
+})
+
 test('mobile navigation stays usable without document overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
   await page.locator('nav').getByRole('button', { name: 'Storage', exact: true }).click()
-  await expect(page.getByText('Indicators', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Indicators \d+ folders?$/ })).toBeVisible()
   await page.locator('nav').getByRole('button', { name: 'Data', exact: true }).click()
   await expect(page.getByRole('button', { name: /Add terminal/i })).toBeDisabled()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
