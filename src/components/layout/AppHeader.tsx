@@ -3,7 +3,6 @@ import { getLayoutSlotCount, type LayoutMode, type PersistedChartState, type Tab
 import { usePersistedState } from '../../store/PersistedContext'
 import { applySlotToChartState, type ChartTemplate } from '../../store/templateStore'
 import { theme } from '../../design-system'
-import { APP_DISPLAY_VERSION } from '../../appVersion'
 import ApolloLogo from './ApolloLogo'
 import TemplatePicker from '../TemplatePicker'
 import { connectionStatus, CONNECTION_TITLE } from '../../utils/connectionStatus'
@@ -137,20 +136,6 @@ export default function AppHeader({ wsConnected }: Props) {
           whiteSpace:    'nowrap',
         }}>
           M&A Capital
-        </span>
-        <span
-          title="Dashboard version (src/appVersion.ts)"
-          style={{
-            fontSize:      theme.fonts.size.xs,
-            fontFamily:    theme.fonts.mono,
-            color:          theme.colors.text.dimmer,
-            fontWeight:     300,
-            letterSpacing:  '0.04em',
-            userSelect:     'none',
-            whiteSpace:     'nowrap',
-          }}
-        >
-          {APP_DISPLAY_VERSION}
         </span>
       </div>
 

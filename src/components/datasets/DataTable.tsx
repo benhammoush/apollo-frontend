@@ -9,6 +9,7 @@
  * - global search
  * - column visibility selector
  * - per-column value filters (click ▾ on header)
+ * @packageDocumentation
  */
 
 import { useState, useMemo, useRef, useEffect, useCallback, useDeferredValue } from 'react'
@@ -167,6 +168,7 @@ function inferColumnWidths(
 /* table component */
 /* ------------------------------------------------ */
 
+/** Render loaded rows with search, sorting and filtering, requesting further pages at the scroll boundary. */
 export function JsonTableViewer({ rows, aqTable, arrayKeys, activeKey, onKeyChange, totals, enableRowMarks, rowMarksKey, onNavigateToDate, onEndReached, filterResetKey, virtualizeColumns = false, loadingMore = false, hasMoreRows = false }: {
   rows: Record<string, unknown>[]
   aqTable?: AqTable | null
