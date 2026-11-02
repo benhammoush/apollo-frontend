@@ -1,7 +1,5 @@
 /**
- * Single source for dashboard version. Bump `APP_PACKAGE_VERSION` when you ship.
- * `APP_DISPLAY_VERSION` is shown in the header. Keep package.json and its lockfile version aligned.
+ * Release metadata only; the dashboard headers intentionally omit a version label.
+ * Keep package.json and its lockfile version aligned with `APP_PACKAGE_VERSION`.
  */
-export const APP_PACKAGE_VERSION = '0.0.1'
-
-export const APP_DISPLAY_VERSION = `v${APP_PACKAGE_VERSION}`
+export const APP_PACKAGE_VERSION = '1.0.0'

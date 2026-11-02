@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import ApolloLogo from './ApolloLogo'
 import { theme } from '../../design-system'
-import { APP_DISPLAY_VERSION } from '../../appVersion'
 import { usePersistedState } from '../../store/PersistedContext'
 import { connectionStatus, CONNECTION_TITLE } from '../../utils/connectionStatus'
 
@@ -57,22 +56,6 @@ export default function MobileHeader({ wsConnected }: Props) {
         whiteSpace:    'nowrap',
       }}>
         M&A Capital
-      </span>
-      <span
-        title="Dashboard version (appVersion.ts)"
-        style={{
-          fontSize:      9,
-          fontFamily:    theme.fonts.mono,
-          color:         theme.colors.text.dimmer,
-          fontWeight:    300,
-          maxWidth:      import.meta.env.MODE === 'public' ? 48 : 120,
-          overflow:      'hidden',
-          textOverflow:  'ellipsis',
-          whiteSpace:    'nowrap',
-          flexShrink:    1,
-        }}
-      >
-        {APP_DISPLAY_VERSION}
       </span>
 
       <div style={{ flex: 1 }} />

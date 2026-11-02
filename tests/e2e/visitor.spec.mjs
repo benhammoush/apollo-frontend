@@ -8,6 +8,8 @@ test('fresh workspace paints both default charts and restores its selected datas
   visitor,
 }) => {
   await page.goto('/')
+  await expect(page.locator('header').getByText('M&A Capital', { exact: true })).toBeVisible()
+  await expect(page.locator('header').getByText(/v\d+\.\d+\.\d+/)).toHaveCount(0)
   await expect(page.getByText('EURUSD.csv', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Indicators 1 ▾', exact: true })).toHaveCount(1)
   await page.getByRole('button', { name: 'Indicators 1 ▾', exact: true }).click()
@@ -224,6 +226,8 @@ test('Levels stays unavailable after restoring previously enabled chart settings
 test('mobile navigation stays usable without document overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
+  await expect(page.locator('header').getByText('M&A Capital', { exact: true })).toBeVisible()
+  await expect(page.locator('header').getByText(/v\d+\.\d+\.\d+/)).toHaveCount(0)
   await page.locator('nav').getByRole('button', { name: 'Storage', exact: true }).click()
   await expect(page.getByRole('button', { name: /Indicators \d+ folders?$/ })).toBeVisible()
   await page.locator('nav').getByRole('button', { name: 'Data', exact: true }).click()

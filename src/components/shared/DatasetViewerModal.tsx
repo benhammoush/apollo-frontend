@@ -1,3 +1,7 @@
+/**
+ * Loads selected datasets and displays bounded snapshot pages in table or JSON form.
+ * @packageDocumentation
+ */
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import JsonView from '@uiw/react-json-view'
 
@@ -40,6 +44,7 @@ const JSON_VIEW_STYLE = {
   '--w-rjv-type-undefined-color': theme.colors.text.muted,
 } as CSSProperties
 
+/** Show a selected dataset, preserving loaded rows when later pages fail and labeling synthetic previews. */
 export default function DatasetViewerModal({
   target,
   onClose,

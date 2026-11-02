@@ -1,3 +1,7 @@
+/**
+ * Lists chart indicators while keeping unavailable choices masked and disabled.
+ * @packageDocumentation
+ */
 import { theme } from '../../design-system'
 import type { ChartIndicatorId, ChartIndicatorsState, LevelsIndicatorState, TriggersIndicatorState, SessionLevelsIndicatorState, SessionsOhlcIndicatorState, StockExchangesIndicatorState } from '../../store/persistedState'
 import { INDICATOR_DEFINITIONS, INDICATOR_GROUP_LABELS } from './indicatorLibrary'
@@ -19,6 +23,7 @@ const MASKED_INDICATORS = new Set<ChartIndicatorId>([
   'trends', 'families', 'triggers', 'sessionLevels', 'levels',
 ])
 
+/** Display indicator availability and open settings only for selectable entries. */
 export default function IndicatorModal({
   open,
   indicators,
