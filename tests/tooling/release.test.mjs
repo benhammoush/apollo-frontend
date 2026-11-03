@@ -149,21 +149,9 @@ test('visitor source omits unavailable private workflows and legacy pane setting
   assert.doesNotMatch(publicGuide, /IC Markets|ngrok|SMOKE_BYPASS|SETUP\.md|apollo-frontend-dev/)
 })
 
-test('CodeRabbit approves completed reviews without author overrides and keeps inherited policy', () => {
-  const policy = parse(readFileSync('.coderabbit.yaml', 'utf8'), {
-    uniqueKeys: true,
-    maxAliasCount: 0,
-  })
-  assert.deepEqual(policy, {
-    inheritance: true,
-    reviews: {
-      high_level_summary: false,
-      auto_approvals: { enabled: true, allow_author_approval: false },
-      auto_review: { enabled: true, auto_incremental_review: true },
-    },
-  })
-  assertPublicationInputs(['.coderabbit.yaml'], readFileSync('.gitignore', 'utf8'))
-  assert.ok(readFileSync('scripts/check-release.mjs', 'utf8').includes("'.coderabbit.yaml'"))
+test('retired CodeRabbit configuration is absent', () => {
+  assert.equal(existsSync('.coderabbit.yaml'), false)
+  assert.equal(existsSync('.coderabbit.yml'), false)
 })
 
 test('publication scans YAML and extensionless metadata for credentials', () => {
@@ -181,7 +169,13 @@ test('publication scans YAML and extensionless metadata for credentials', () => 
     )
     writeFileSync(join(root, 'src/appVersion.ts'), "export const APP_PACKAGE_VERSION = '0.0.1'")
     writeFileSync(join(root, '.gitignore'), '')
-    for (const name of ['.coderabbit.yaml', '.gitattributes', '.gitignore', '.nvmrc']) {
+    for (const name of [
+      'public-config.yaml',
+      'public-config.yml',
+      '.gitattributes',
+      '.gitignore',
+      '.nvmrc',
+    ]) {
       writeFileSync(join(root, name), '# Public metadata\n')
       assert.ok(checkRelease(root) > 0)
       writeFileSync(join(root, name), `# ${'ghp_' + 'a'.repeat(36)}\n`)
