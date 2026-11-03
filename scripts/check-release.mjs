@@ -67,8 +67,8 @@ export function checkRelease(root = '.', dist = false) {
   if (!dist)
     for (const name of readdirSync(root)) {
       if (
-        /\.(?:json|mjs|html|md)$/.test(name) ||
-        ['.coderabbit.yaml', '.gitattributes', '.gitignore', '.nvmrc'].includes(name)
+        /\.(?:json|mjs|html|md|ya?ml)$/.test(name) ||
+        ['.gitattributes', '.gitignore', '.nvmrc'].includes(name)
       )
         files.push(join(root, name))
     }
