@@ -31,4 +31,3 @@ jobs:
       lock_scope: all
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      SMOKE_BYPASS: ${{ secrets.SMOKE_BYPASS }}
