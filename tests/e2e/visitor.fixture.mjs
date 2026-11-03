@@ -32,6 +32,11 @@ async function visitor({ page, context }, use) {
   await context.route('**/*', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
+    if (url.origin === 'http://127.0.0.1:5186' && url.pathname === '/_vercel/insights/script.js')
+      return route.fulfill({
+        contentType: 'application/javascript',
+        body: '/* Keep analytics queued locally; never send test visits. */',
+      })
     if (url.origin === 'http://127.0.0.1:5186') return route.continue()
     if (url.origin !== endpoints.VITE_API_URL) {
       state.unexpected.push(`${url.origin}${url.pathname}`)

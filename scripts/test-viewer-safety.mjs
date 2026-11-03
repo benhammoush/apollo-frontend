@@ -585,11 +585,11 @@ test('unavailable Levels cannot be restored from saved or legacy chart settings'
   }
 })
 
-test('Dashboard v1 metadata stays aligned without version or Notices labels in either header', () => {
+test('Dashboard metadata stays aligned without version or Notices labels in either header', () => {
   const version = loadSource('appVersion.ts')
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
   const lock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'))
-  assert.equal(version.APP_PACKAGE_VERSION, '1.0.0')
+  assert.equal(version.APP_PACKAGE_VERSION, '1.1.0')
   assert.equal(pkg.version, version.APP_PACKAGE_VERSION)
   assert.equal(lock.version, pkg.version)
   assert.equal(lock.packages[''].version, pkg.version)

@@ -95,6 +95,13 @@ MT5 credentials, private operator controls, original research datasets and the
 original application's Git history are excluded. Data is selected on the backend;
 no datasets or live service are bundled with the frontend.
 
+Vercel Web Analytics collects coarse page visits: `/`, `/engine`, `/data` and
+`/account`. Deep-link suffixes, query strings and fragments are excluded;
+unrecognized paths are grouped under `/`. Workspace tab changes, tab names,
+chart selections and dataset contents are not sent as analytics events.
+Collection requires Web Analytics to be enabled on the hosting Vercel project
+before deployment; blocked analytics does not prevent dashboard use.
+
 ## License and notices
 
 Original first-party source is available for portfolio inspection under the
