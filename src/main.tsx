@@ -4,6 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
+import PageAnalytics from './components/viewer/PageAnalytics'
 import { SystemStatusProvider } from './contexts/ViewerSystemStatusContext'
 import { PersistedProvider } from './store/PersistedContext'
 import { PersistenceManager } from './store/persistence'
@@ -14,6 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SystemStatusProvider>
       <BrowserRouter>
+        <PageAnalytics />
         <PersistedProvider>
           <App />
         </PersistedProvider>

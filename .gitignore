@@ -1,4 +1,5 @@
 node_modules/
+/DEV.md
 /docs/SETUP.md
 dist/
 .vercel/

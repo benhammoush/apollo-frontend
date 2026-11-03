@@ -2,7 +2,7 @@
   "name": "apollo-dashboard",
   "private": true,
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
     "node": "24.x",
@@ -27,6 +27,7 @@
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.19",
     "@uiw/react-json-view": "^2.0.0-alpha.41",
+    "@vercel/analytics": "2.0.1",
     "arquero": "^8.0.3",
     "lightweight-charts": "^5.0.5",
     "lightweight-charts-indicators": "^0.4.0",
